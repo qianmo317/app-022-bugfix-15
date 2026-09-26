@@ -47,14 +47,15 @@ export const TEMPLATES: Template[] = [
   {
     id: 'abc',
     name: '英语字母与数字',
-    desc: 'A-Z a-z 0-9，田字格练写',
+    desc: 'A-Z a-z 0-9，四线格练写',
     title: '英语字母数字',
-    chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+    chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
     layoutPatch: {
-      grid: 'tian',
-      cellMm: 20,
-      perLine: 10,
-      mix: { model: 1, strokeSteps: 3, trace: 2, blank: 4 },
+      grid: 'line',
+      fourLine: true,
+      cellMm: 15,
+      perLine: 13,
+      mix: { model: 1, strokeSteps: 0, trace: 2, blank: 3 },
     },
   },
   {
@@ -77,13 +78,20 @@ export const TEMPLATES: Template[] = [
 /** 由模板创建字帖草稿（不写入 storage，由编辑器首次自动保存） */
 export function worksheetFromTemplate(t: Template): Worksheet {
   const chars = [...t.chars].filter((c) => c.trim().length > 0);
+  const patch = t.layoutPatch ?? {};
   return {
     id: newId(),
     title: t.title,
     chars,
-    layout: defaultLayout,
+    layout: {
+      ...defaultLayout,
+      ...patch,
+      mix: { ...defaultLayout.mix, ...patch.mix },
+      show: { ...defaultLayout.show, ...patch.show },
+    },
     pages: 0,
     updatedAt: Date.now(),
-    sortByStrokes: true,
+    // 模板字序即教学顺序（如生字表），默认不按笔画重排
+    sortByStrokes: false,
   };
 }

@@ -57,4 +57,33 @@ describe('模板库', () => {
     expect(a.id).not.toBe(b.id);
     expect(a.chars.length).toBeGreaterThan(0);
   });
+
+  it('worksheetFromTemplate 套用模板版式（格宽/每行格数/描红格）', async () => {
+    const { TEMPLATES, worksheetFromTemplate } = await import('../../src/lib/templates');
+    const { defaultLayout } = await import('../../src/lib/layout');
+    const ws = worksheetFromTemplate(TEMPLATES.find((t) => t.id === 'name')!);
+    expect(ws.layout.cellMm).toBe(25);
+    expect(ws.layout.perLine).toBe(8);
+    expect(ws.layout.mix).toEqual({ model: 1, strokeSteps: 3, trace: 4, blank: 2 });
+    // 未打补丁的字段回落到默认值，且不共享 defaultLayout 引用
+    expect(ws.layout.grid).toBe(defaultLayout.grid);
+    expect(ws.layout).not.toBe(defaultLayout);
+    expect(ws.layout.mix).not.toBe(defaultLayout.mix);
+  });
+
+  it('worksheetFromTemplate 保持模板字序（不按笔画重排）', async () => {
+    const { TEMPLATES, worksheetFromTemplate } = await import('../../src/lib/templates');
+    const ws = worksheetFromTemplate(TEMPLATES.find((t) => t.id === 'grade1')!);
+    expect(ws.sortByStrokes).toBe(false);
+    expect(ws.chars.slice(0, 10).join('')).toBe('一二三四五六七八九十');
+  });
+
+  it('英语字母数字模板：四线格、小格、含 0-9', async () => {
+    const { TEMPLATES, worksheetFromTemplate } = await import('../../src/lib/templates');
+    const ws = worksheetFromTemplate(TEMPLATES.find((t) => t.id === 'abc')!);
+    expect(ws.layout.grid).toBe('line');
+    expect(ws.layout.fourLine).toBe(true);
+    expect(ws.layout.cellMm).toBeLessThan(20);
+    expect(ws.chars.filter((c) => /[0-9]/.test(c)).join('')).toBe('0123456789');
+  });
 });

@@ -1,13 +1,14 @@
 import type { JSX } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { TEMPLATES, worksheetFromTemplate } from '../lib/templates';
+import type { Template } from '../lib/templates';
 import { saveWorksheet } from '../lib/storage';
 
 /** 模板库：一键套用模板创建字帖 */
 export default function Library(): JSX.Element {
   const navigate = useNavigate();
-  const apply = (i: number) => {
-    const ws = worksheetFromTemplate(TEMPLATES[TEMPLATES.length - 1 - i]);
+  const apply = (t: Template) => {
+    const ws = worksheetFromTemplate(t);
     saveWorksheet(ws);
     navigate(`/worksheet/${ws.id}`);
   };
@@ -18,8 +19,8 @@ export default function Library(): JSX.Element {
         <Link className="btn ghost" to="/">← 首页</Link>
       </header>
       <div className="template-grid">
-        {TEMPLATES.map((t, i) => (
-          <button key={t.id} className="card template-card" data-testid={`template-${t.id}`} onClick={() => apply(i)}>
+        {TEMPLATES.map((t) => (
+          <button key={t.id} className="card template-card" data-testid={`template-${t.id}`} onClick={() => apply(t)}>
             <strong>{t.name}</strong>
             <span className="hint">{t.desc}</span>
             <span className="template-chars">{[...t.chars].slice(0, 12).join(' ')}…</span>
