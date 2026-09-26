@@ -7,7 +7,7 @@ import { saveWorksheet } from '../lib/storage';
 export default function Library(): JSX.Element {
   const navigate = useNavigate();
   const apply = (i: number) => {
-    const ws = worksheetFromTemplate(TEMPLATES[TEMPLATES.length - 1 - i]);
+    const ws = worksheetFromTemplate(TEMPLATES[i]);
     saveWorksheet(ws);
     navigate(`/worksheet/${ws.id}`);
   };

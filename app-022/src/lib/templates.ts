@@ -49,7 +49,7 @@ export const TEMPLATES: Template[] = [
     name: '英语字母与数字',
     desc: 'A-Z a-z 0-9，田字格练写',
     title: '英语字母数字',
-    chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+    chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
     layoutPatch: {
       grid: 'tian',
       cellMm: 20,
@@ -77,13 +77,21 @@ export const TEMPLATES: Template[] = [
 /** 由模板创建字帖草稿（不写入 storage，由编辑器首次自动保存） */
 export function worksheetFromTemplate(t: Template): Worksheet {
   const chars = [...t.chars].filter((c) => c.trim().length > 0);
+  // 在默认版式上套用模板自带配置（嵌套的 mix/show 也做合并，允许模板只覆盖部分字段）
+  const layout: Layout = {
+    ...defaultLayout,
+    ...t.layoutPatch,
+    mix: { ...defaultLayout.mix, ...t.layoutPatch?.mix },
+    show: { ...defaultLayout.show, ...t.layoutPatch?.show },
+  };
   return {
     id: newId(),
     title: t.title,
     chars,
-    layout: defaultLayout,
+    layout,
     pages: 0,
     updatedAt: Date.now(),
-    sortByStrokes: true,
+    // 模板字符集本身已按教学顺序编排（如生字表顺序），不默认按笔画数重排
+    sortByStrokes: false,
   };
 }
